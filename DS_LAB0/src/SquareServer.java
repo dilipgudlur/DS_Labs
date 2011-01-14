@@ -1,4 +1,8 @@
-  import java.net.*;
+                                                                     
+                                                                     
+                                                                     
+                                             
+      import java.net.*;
     import java.io.*;
     import java.util.Properties;
     import java.util.Enumeration;
@@ -164,46 +168,84 @@ void send(Message message){
 
             }
 }
-Message receive()  // need to make return type as Message
-{ 
+Message receive( )  // need to make return type as Message
+{
+    Message msg_received = new Message();
+    
      try {
-                ServerSocket ss = new ServerSocket(4679); 
+                
+                String dest_name_msg ="";
+                String dest_msg_kind ="";
+                String dest_msg_id ="";
+                String payload = "";
+                int cnt =0;
+                ServerSocket ss = new ServerSocket(4565); 
                 System.out.println("Inside server ");
                 Socket clientSocket = ss.accept();
                 DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
-                DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
-                int result = dis.readInt();
+                //DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
+                BufferedReader dis = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                String result;
+                while ((result = dis.readLine()) != null){
+                if(cnt==0)
+                dest_name_msg= result;
+                else if(cnt==1)
+                dest_msg_kind= result;
+                else if(cnt==2)
+                dest_msg_id= result;
+                else
+                payload = payload + result;
+                cnt++;
+                }
+               msg_received = new Message(dest_name_msg,dest_msg_kind,dest_msg_id,payload);
                 System.out.println("Inside server result is ");
-                dos.writeInt(result);
+               // dos.writeInt(result);
                 clientSocket.close();
                 ss.close();
-
+                
+             
             }
             catch (Exception e) {
 
                 System.out.println("Exception: " + e);
 
             }
+            return msg_received;
 }
 }
 
  class Message {
-	private String dest_name;
-	private String msg_kind;
-	private String msg_id;
-	private Object msg_data;
-	public Message(String dest, String kind, String id, Object data)
-	{
-	   dest_name = dest;
-	   msg_kind = kind;
-	   msg_id =id;
-	   msg_data = data;
-	}
+private String dest_name;
+private String msg_kind;
+private String msg_id;
+private Object msg_data;
+public Message(String dest, String kind, String id, Object data)
+{
+   dest_name = dest;
+   msg_kind = kind;
+   msg_id =id;
+   msg_data = data;
+}
+public void Message(String dest, String kind, String id, Object data)
+{
+   dest_name = dest;
+   msg_kind = kind;
+   msg_id =id;
+   msg_data = data;
+}
+public Message()
+{
+   dest_name = "";
+   msg_kind = "";
+   msg_id = "";
+
+}
 }
     
- public class SquareServer {
+    
+     public class SquareServer {
 
-  public static void main (String args[]) {
+        public static void main (String args[]) {
             
             try{
                 String fileName = "lab0.config";
@@ -215,10 +257,10 @@ Message receive()  // need to make return type as Message
     String kind_for_msg = "kind1";
     String id_for_msg = "1";
     String name_for_msg = "alice";
-    Message msg_for_send = new Message(name_for_msg,kind_for_msg,id_for_msg,obj_for_msg);
+    Message msg_for_receive = new Message();
               //  Socket s = new Socket("128.237.224.19",4645);
                 
-               msg_for_send= first_one.receive();
+              msg_for_receive = first_one.receive();
    
             }
             catch (Exception e) {
