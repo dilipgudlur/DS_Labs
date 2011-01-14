@@ -179,46 +179,51 @@ Message receive( )  // need to make return type as Message
                 String dest_msg_id ="";
                 String payload = "";
                 int cnt =0;
-                ServerSocket ss = new ServerSocket(4565); 
+                ServerSocket ss = new ServerSocket(4679); 
                 System.out.println("Inside server ");
                 Socket clientSocket = ss.accept();
+                
                 DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
+                
                 //DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
                 BufferedReader dis = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 String result;
+                               
                 while ((result = dis.readLine()) != null){
-                if(cnt==0)
-                dest_name_msg= result;
-                else if(cnt==1)
-                dest_msg_kind= result;
-                else if(cnt==2)
-                dest_msg_id= result;
-                else
-                payload = payload + result;
-                cnt++;
+                	System.out.println("OUTPUT=" + result);                	
+	                if(cnt==0)
+	                dest_name_msg= result;
+	                else if(cnt==1)
+	                dest_msg_kind= result;
+	                else if(cnt==2)
+	                dest_msg_id= result;
+	                else
+	                payload = payload + result;
+	                cnt++;
                 }
-               msg_received = new Message(dest_name_msg,dest_msg_kind,dest_msg_id,payload);
-                System.out.println("Inside server result is ");
-               // dos.writeInt(result);
-                clientSocket.close();
-                ss.close();
                 
-             
+               msg_received = new Message(dest_name_msg,dest_msg_kind,dest_msg_id,payload);
+               //System.out.println("Inside server result is");
+               // dos.writeInt(result);
+               clientSocket.close();
+               ss.close();      
             }
             catch (Exception e) {
-
                 System.out.println("Exception: " + e);
-
             }
             return msg_received;
-}
+	}
 }
 
  class Message {
+
+	
 private String dest_name;
 private String msg_kind;
 private String msg_id;
 private Object msg_data;
+	
+	 
 public Message(String dest, String kind, String id, Object data)
 {
    dest_name = dest;
@@ -240,6 +245,14 @@ public Message()
    msg_id = "";
 
 }
+void disp_msg(){
+    System.out.println("dest_name is" + dest_name);
+    System.out.println("msg_kind is" + msg_kind);
+    System.out.println("msg_id is" +   msg_id);
+    System.out.println("msg_data is" + msg_data);
+}
+
+
 }
     
     
@@ -260,8 +273,16 @@ public Message()
     Message msg_for_receive = new Message();
               //  Socket s = new Socket("128.237.224.19",4645);
                 
-              msg_for_receive = first_one.receive();
+              
+    while(true){
+    	msg_for_receive = first_one.receive();
+        msg_for_receive.disp_msg();
+    	//System.out.println("dest_name is" + msg_for_receive.dest_name);
+        //System.out.println("msg_kind is" + msg_for_receive.msg_kind);
+        //System.out.println("msg_id is" +   msg_for_receive.msg_id);
+    }
    
+              
             }
             catch (Exception e) {
 
