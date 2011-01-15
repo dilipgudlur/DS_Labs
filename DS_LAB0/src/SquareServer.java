@@ -1,21 +1,37 @@
-                                                                     
-                                                                     
+                                                      
                                                                      
                                              
-      import java.net.*;
+    import java.net.*;
     import java.io.*;
     import java.util.Properties;
     import java.util.Enumeration;
   
-    
+    import java.util.*;
     
  class MessagePasser {
+    private  ArrayList<Message> rec_messages;
+    private  ArrayList<Message> send_messages;
     private String[] all_names = new String[10];
     private String[] all_ports = new String[10];
     private int num_hosts;
-public MessagePasser(String configuration_filename, String local_name){
+    public void add_rec_msg_to_buffer(Message msg)
+    {
+        
+        rec_messages.add(msg);
+        msg.disp_msg();
+    }
+    public void add_send_msg_to_buffer(Message msg)
+    {
+        
+        send_messages.add(msg);
+        msg.disp_msg();
+    }
+    
+    public MessagePasser(String configuration_filename, String local_name){
     
     try{
+          rec_messages = new ArrayList<Message>();
+          send_messages = new ArrayList<Message>();
           File myFile = new File(configuration_filename);
           
           FileInputStream fis = new FileInputStream(myFile);
@@ -132,7 +148,7 @@ public MessagePasser(String configuration_filename, String local_name){
       
     }
     
-    num_hosts = count;
+    num_hosts = count/2;
      System.out.println("Number of ips "+ count);
     System.out.println("Number of ports "+ count_port);
     for(int j=0;j<count-1;j=j+2){
@@ -147,26 +163,32 @@ public MessagePasser(String configuration_filename, String local_name){
             }
 }
 void send(Message message){
-               // Socket s = new Socket(all_names[1],all_ports[1]);
-               try {
-               Socket s = new Socket("128.237.250.114",4565);
-                System.out.println("Inside client");
-   
+       // Socket s = new Socket(all_names[1],all_ports[1]);
+       try {
+       Socket s = new Socket("128.237.240.118",3715);
+        System.out.println("Inside client");
+    //    message.disp_msg();
 
-                DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-                DataInputStream dis = new DataInputStream(s.getInputStream());
-                dos.writeInt(6);
+        DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+        DataInputStream dis = new DataInputStream(s.getInputStream());
+        
+        PrintWriter writer = new PrintWriter(s.getOutputStream(),true);
+        
+        writer.println(message.get_destname());
+        writer.println(message.get_msg_kind());
+        writer.println(message.get_msg_id());
+        writer.println(message.get_msg_data().toString());
+       
+      //  dos.writeInt(6);
 
-                int result = dis.readInt();
-                System.out.println("The square of 6 is " + result);
+        
+        s.close();
+       }
+       catch (Exception e) {
 
-                s.close();
-               }
-               catch (Exception e) {
+        System.out.println("Exception: " + e);
 
-                System.out.println("Exception: " + e);
-
-            }
+    }
 }
 Message receive( )  // need to make return type as Message
 {
@@ -174,56 +196,51 @@ Message receive( )  // need to make return type as Message
     
      try {
                 
-                String dest_name_msg ="";
-                String dest_msg_kind ="";
-                String dest_msg_id ="";
-                String payload = "";
-                int cnt =0;
-                ServerSocket ss = new ServerSocket(4679); 
-                System.out.println("Inside server ");
-                Socket clientSocket = ss.accept();
-                
-                DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
-                
-                //DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
-                BufferedReader dis = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                String result;
-                               
-                while ((result = dis.readLine()) != null){
-                	System.out.println("OUTPUT=" + result);                	
-	                if(cnt==0)
-	                dest_name_msg= result;
-	                else if(cnt==1)
-	                dest_msg_kind= result;
-	                else if(cnt==2)
-	                dest_msg_id= result;
-	                else
-	                payload = payload + result;
-	                cnt++;
-                }
-                
-               msg_received = new Message(dest_name_msg,dest_msg_kind,dest_msg_id,payload);
-               //System.out.println("Inside server result is");
-               // dos.writeInt(result);
-               clientSocket.close();
-               ss.close();      
-            }
+        String dest_name_msg ="";
+        String dest_msg_kind ="";
+        String dest_msg_id ="";
+        String payload = "";
+        int cnt =0;
+        ServerSocket ss = new ServerSocket(2859); 
+        System.out.println("Inside server ");
+        Socket clientSocket = ss.accept();
+        DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
+        //DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
+        BufferedReader dis = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        String result;
+        while ((result = dis.readLine()) != null){
+        if(cnt==0)
+        dest_name_msg= result;
+        else if(cnt==1)
+        dest_msg_kind= result;
+        else if(cnt==2)
+        dest_msg_id= result;
+        else
+        payload = payload + result;
+        cnt++;
+        }
+       msg_received = new Message(dest_name_msg,dest_msg_kind,dest_msg_id,payload);
+        System.out.println("Inside server result is ");
+       // dos.writeInt(result);
+        clientSocket.close();
+        ss.close();
+        
+     }
             catch (Exception e) {
+
                 System.out.println("Exception: " + e);
+
             }
             return msg_received;
-	}
+}
+
 }
 
  class Message {
-
-	
 private String dest_name;
 private String msg_kind;
 private String msg_id;
 private Object msg_data;
-	
-	 
 public Message(String dest, String kind, String id, Object data)
 {
    dest_name = dest;
@@ -243,46 +260,123 @@ public Message()
    dest_name = "";
    msg_kind = "";
    msg_id = "";
+   msg_data = null;
 
 }
-void disp_msg(){
-    System.out.println("dest_name is" + dest_name);
-    System.out.println("msg_kind is" + msg_kind);
-    System.out.println("msg_id is" +   msg_id);
-    System.out.println("msg_data is" + msg_data);
+public int checkmessage_null()
+{
+   
+   if(msg_data == null)
+   return 1;
+else return 0;
+
 }
-
-
+public void disp_msg()
+{
+    System.out.println(" Dest name is " + dest_name);
+    System.out.println(" Dest name is " + msg_kind);
+    System.out.println(" Dest name is " + msg_id);
+    System.out.println(" Dest name is " + msg_data);
+}
+String get_destname()
+{
+    return dest_name;
+}
+String get_msg_kind()
+{
+    return msg_kind;
+}
+String get_msg_id()
+{
+    return msg_id;
+}
+Object get_msg_data()
+{
+    return msg_data;
+}
 }
     
+    class Send_thread implements Runnable {
+        MessagePasser first_one;
+        public Send_thread()
+        {
+        	String fileName = "lab0.config";
+        	first_one = new MessagePasser(fileName,"lab0");
+        }
+        public void run(){
+		    Integer int_obj = new Integer(5);
+		    Object obj_for_msg = int_obj;
+		    String kind_for_msg = "kind1";
+		    String id_for_msg = "1";
+		    String name_for_msg = "alice";
+		    Message msg_for_send = new Message(name_for_msg,kind_for_msg,id_for_msg,obj_for_msg);
+		    while(true){
+		    first_one.send(msg_for_send);
+		   }
+    }
+        
+    }
     
-     public class SquareServer {
+    
+    class Receive_thread implements Runnable {
+        MessagePasser first_one;
+        public Receive_thread()
+        {
+            String fileName = "lab1.config";
+        first_one = new MessagePasser(fileName,"lab0");
+        }
+    public void run(){
+       
+         Message msg_for_receive = new Message();
+             
+             while(true){
+            msg_for_receive = first_one.receive();
+            if (msg_for_receive.checkmessage_null() == 0)
+            	first_one.add_rec_msg_to_buffer(msg_for_receive);
+            	//msg_for_receive.disp_msg();
+             }
+    }
+        
+    }
+    
+     public class SquareClient {
 
         public static void main (String args[]) {
             
             try{
-                String fileName = "lab0.config";
-            MessagePasser first_one = new MessagePasser(fileName,"lab0");
-            
-            
-    
-    Object obj_for_msg = new Object();
+                Send_thread sth =  new Send_thread();
+                Receive_thread rth = new Receive_thread();
+                Thread a = new Thread(sth);
+                Thread b = new Thread(rth);
+                b.start();
+                a.start();
+                while(true){
+                
+                	b.sleep(10);                
+                	a.sleep(10);
+                }
+                
+              //  String fileName = "lab0.config";
+          // MessagePasser first_one = new MessagePasser(fileName,"lab0");
+            // for me becoming the sender
+           /*
+    Integer int_obj = new Integer(5);
+    Object obj_for_msg = int_obj;
     String kind_for_msg = "kind1";
     String id_for_msg = "1";
     String name_for_msg = "alice";
-    Message msg_for_receive = new Message();
-              //  Socket s = new Socket("128.237.224.19",4645);
-                
-              
-    while(true){
-    	msg_for_receive = first_one.receive();
-        msg_for_receive.disp_msg();
-    	//System.out.println("dest_name is" + msg_for_receive.dest_name);
-        //System.out.println("msg_kind is" + msg_for_receive.msg_kind);
-        //System.out.println("msg_id is" +   msg_for_receive.msg_id);
-    }
-   
-              
+    Message msg_for_send = new Message(name_for_msg,kind_for_msg,id_for_msg,obj_for_msg);
+    first_one.send(msg_for_send);
+           */
+            // for me becoming the receiver
+            /*
+            Message msg_for_receive = new Message();
+            while(true){
+                first_one.send(msg_for_send);
+             msg_for_receive = first_one.receive();
+            msg_for_receive.disp_msg();
+                        }
+            */
             }
             catch (Exception e) {
 
@@ -292,4 +386,3 @@ void disp_msg(){
        }
 
     }
-
