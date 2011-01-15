@@ -1,4 +1,7 @@
-          
+                                                                     
+                                                                     
+                                                                     
+                                             
     import java.net.*;
     import java.io.*;
     import java.util.Properties;
@@ -7,39 +10,181 @@
     import java.util.*;
     
  class MessagePasser {
+    private int is_ks_type;  // 1 means is, 0 means ks
+    private int ir_kr_type;  // 1 means ir, 0 means kr
     private  ArrayList<Message> rec_messages;
     private  ArrayList<Message> send_messages;
     private String[] all_names = new String[10];
     private String[] all_ports = new String[10];
-    private String[] msg_kind = {"kind1","kind2","kind3","kind4","kind5","kind6"};
+    private String[] ks_type = new String[10];
+    private String[] kr_type = new String[10];
+    private String[] is_type = new String[10];
+    private String[] ir_type = new String[10];
+     private String[] ks_action_type = new String[10];
+    private String[] kr_action_type = new String[10];
+    private String[] is_action_type = new String[10];
+    
+    private String[] ir_action_type = new String[10];
+    private String[] msg_kind = {"1","2","3","4","5","6"};
     private String[] msg_id = {"msgid1","msgid2","msgid3","msgid4","msgid5","msgid6"};
     private Object[] msg_data = {12,34,56,78,89,90};
     private int num_hosts;
     
-    public int num_of_send_buffers()
+    public int is_present()
     {
-    	return send_messages.size();
+        if (is_ks_type ==1)
+        return 1;
+        else
+        return 0;
+    }
+     public int ir_present()
+    {
+        if (ir_kr_type ==1)
+        return 1;
+        else
+        return 0;
+    }
+     public void print_is_action()
+    
+    {
+        
+        for (int j=0;j<is_type.length ;j++)
+        {
+            System.out.println(is_type[j]);
+            
+        }
+       
+     
+
+    }
+    public String get_is_action(String msg_type)
+    {
+        int result=0;
+        int flag=0;
+        String tosend = "default";
+        for (int j=0;j<is_type.length ;j++)
+        {
+            if(msg_type!=null && is_type[j]!=null){
+            if(is_type[j].equals(msg_type))
+            {
+            result =j;
+            flag=1;
+            }
+    
+            }
+        }
+        
+        if(flag==1)
+        return is_action_type[result];
+        else        return tosend;
+        
     }
     
+    
+    public String get_ks_action(String msg_type)
+    {
+        int result=0;
+        int flag=0;
+        String tosend = "default";
+        for (int j=0;j<ks_type.length ;j++)
+        {
+            if(msg_type!=null && ks_type[j]!=null){
+            if(ks_type[j].equals(msg_type))
+            {
+            result =j;
+            flag=1;
+            }
+            }
+        }
+        
+         if(flag==1)
+        return is_action_type[result];
+        else        return tosend;
+        
+    }
+    
+    
+    public String get_ir_action(String msg_type)
+    {
+       int result=0;
+        int flag=0;
+        String tosend = "default";
+        for (int j=0;j<ir_type.length ;j++)
+        {
+            if(msg_type!=null && ir_type[j]!=null){
+            if(ir_type[j].equals(msg_type))
+            {
+            result =j;
+            flag=1;
+            }
+            }
+        }
+        
+         if(flag==1)
+        return ir_action_type[result];
+        else        return tosend;
+    }
+    
+    public String get_kr_action(String msg_type)
+    {
+        int result=0;
+        int flag=0;
+        String tosend = "default";
+        for (int j=0;j<kr_type.length ;j++)
+        {
+            if(msg_type!=null && kr_type[j]!=null){
+            if(kr_type[j].equals(msg_type))
+            {
+            result =j;
+            flag=1;
+            }
+            }
+        }
+        
+         if(flag==1)
+        return kr_action_type[result];
+        else        return tosend;
+    }
+    
+    
+    public int num_of_send_buffers()
+    {
+        return send_messages.size();
+    }
     public void add_rec_msg_to_buffer(Message msg)
     {
+        
         rec_messages.add(msg);
-        //msg.disp_msg();
+       // msg.disp_msg();
     }
     public void add_send_msg_to_buffer(Message msg)
     {
         
         send_messages.add(msg);
-        //msg.disp_msg();
+       // msg.disp_msg();
     }
     public Message retrieve_msg_frm_send_buf()
     {
         Message msg = new Message();
-       // msg = send_messages.get(0);
+      //  msg = send_messages.get(0);
         msg = send_messages.remove(0);
-        //msg.disp_msg();
+      //  msg.disp_msg();
         return msg;    
     }
+    
+    public Message read_msg_frm_send_buf()
+    {
+        Message msg = new Message();
+        msg = send_messages.get(0);
+       // msg = send_messages.remove(0);
+      //  msg.disp_msg();
+        return msg;    
+    }
+    
+    
+    
+    
+    
     public MessagePasser(String configuration_filename, String local_name){
     
     try{
@@ -56,6 +201,10 @@
            boolean b,bp,b_is,b_ir,b_ks,b_kr;
            int loc=0;
            int count=0,count_port=0;
+           
+               
+           
+           
   
         String loc_name = "";
         String temp_name = "";
@@ -115,27 +264,38 @@
 
         
                  
-     
+     int is_cnt=0,ir_cnt=0,ks_cnt=0,kr_cnt=0;
+     is_ks_type=0;
+     ir_kr_type=0;
         while (en_inner.hasMoreElements()) {
       String key = (String) en_inner.nextElement();
       String val = (String)prop.getProperty(key);
           
       b_is = key.startsWith("is.id");
       if(b_is==true) {
+        is_ks_type =1;
               loc = 5;
                 is_action_id = key.substring(5,6);
-          //    System.out.println("is action id is "+ is_action_id);
+                is_type[is_cnt]= is_action_id;
+              
               is_action = val;
-           //   System.out.println("is action "+ is_action);
+              is_action_type[is_cnt]= is_action;
+             
+              is_cnt++;
+              
       }
       
       
        b_ir = key.startsWith("ir.id");
       if(b_ir==true) {
+        ir_kr_type=1;
               loc = 5;
                 ir_action_id = key.substring(5,6);
+                ir_type[ir_cnt]= ir_action_id;
            //   System.out.println("ir action is is "+ ir_action_id);
               ir_action = val;
+              ir_action_type[ir_cnt]= ir_action;
+              ir_cnt++;
           //    System.out.println("ir action "+ ir_action);
       }
       
@@ -143,8 +303,11 @@
       if(b_ks==true) {
               loc = 5;
                 ks_action_id = key.substring(7,8);
+                ks_type[ks_cnt]= ks_action_id;
              // System.out.println("ks  kind is "+ ks_action_id);
               ks_action = val;
+              ks_action_type[ks_cnt]=ks_action;
+              ks_cnt++;
             //  System.out.println("ks kind "+ ks_action);
       }
       
@@ -153,8 +316,11 @@
       if(b_kr==true) {
               loc = 5;
                 kr_action_id = key.substring(7,8);
+                kr_type[kr_cnt]= kr_action_id;
           //    System.out.println("kr  kind is "+ kr_action_id);
               kr_action = val;
+               kr_action_type[kr_cnt]=kr_action;
+              kr_cnt++;
           //    System.out.println("kr kind "+ kr_action);
       }
       
@@ -168,7 +334,7 @@
        // System.out.println("Ip & port for "+ all_names[j]+" is "+ "" +all_names[j+1] + "  "+all_ports[j+1]);
     } // here the total file has been parsed
     // need to create messages & add to send buffer now
-    for(int j=0;j<num_hosts;j=j+1){
+    for(int j=0;j< num_hosts;j=j+1){
         Message msg_for_buf = new Message(all_names[j*2],msg_kind[j],msg_id[j],msg_data[j]);
         this.add_send_msg_to_buffer(msg_for_buf);
       //  msg_for_buf.disp_msg();
@@ -185,7 +351,9 @@
 void send(Message message){
                // Socket s = new Socket(all_names[1],all_ports[1]);
                try {
-               Socket s = new Socket("128.237.240.118",3715);
+            	   for(int j = 1;j<num_hosts*2;j=j+2){
+               Socket s = new Socket(all_names[j],Integer.parseInt(all_ports[j]));
+               
                 System.out.println("Inside client");
             //    message.disp_msg();
 
@@ -203,6 +371,7 @@ void send(Message message){
 
                 
                 s.close();
+            	}
                }
                catch (Exception e) {
 
@@ -324,18 +493,50 @@ Object get_msg_data()
         String fileName = "lab0.config";
         first_one = new MessagePasser(fileName,"lab0");
         }
-	    public void run(){
-		    Integer int_obj = new Integer(5);
-		    Object obj_for_msg = int_obj;
-		    String kind_for_msg = "kind1";
-		    String id_for_msg = "1";
-		    String name_for_msg = "alice";
+    public void run(){
+    Integer int_obj = new Integer(5);
+    Object obj_for_msg = int_obj;
+    String kind_for_msg = "kind1";
+    String id_for_msg = "1";
+    String name_for_msg = "alice";
   //  Message msg_for_send = new Message(name_for_msg,kind_for_msg,id_for_msg,obj_for_msg);
-		    Message msg_for_send = new Message();
-   
-    while(first_one.num_of_send_buffers() > 0 ){
-    	msg_for_send = first_one.retrieve_msg_frm_send_buf();
-    	first_one.send(msg_for_send);
+  Message msg_for_send = new Message();
+    Message msg_for_send2 = new Message();
+    while(first_one.num_of_send_buffers()>0){
+        msg_for_send = first_one.read_msg_frm_send_buf();
+        String msg_action_type;
+         String msg_kind1 = msg_for_send.get_msg_kind();
+         if(first_one.is_present()==1)
+     msg_action_type = first_one.get_is_action(msg_kind1);
+    else
+     msg_action_type = first_one.get_ks_action(msg_kind1);
+     System.out.println("The action to take for this " +msg_kind1 +" is " + msg_action_type);
+     
+    if(msg_action_type.equals("delay"))
+    {
+        System.out.println("delaying");
+    msg_for_send = first_one.retrieve_msg_frm_send_buf();
+    msg_for_send2 = first_one.retrieve_msg_frm_send_buf();
+    first_one.send(msg_for_send2);
+    first_one.send(msg_for_send);
+    }
+     else if(msg_action_type.equals("duplicate")){
+        System.out.println("duplicating");
+    first_one.send(msg_for_send);
+    first_one.send(msg_for_send);
+    msg_for_send = first_one.retrieve_msg_frm_send_buf();
+    }
+    else if(msg_action_type.equals("drop")){
+        System.out.println("dropping");
+        msg_for_send = first_one.retrieve_msg_frm_send_buf();
+    }
+    else
+    {
+        msg_for_send = first_one.retrieve_msg_frm_send_buf();
+    first_one.send(msg_for_send);
+    }
+ 
+    
     }
     }
         
@@ -346,8 +547,8 @@ Object get_msg_data()
         MessagePasser first_one;
         public Receive_thread()
         {
-            String fileName = "lab1.config";
-            first_one = new MessagePasser(fileName,"lab0");
+            String fileName = "lab0.config";
+        first_one = new MessagePasser(fileName,"lab0");
         }
     public void run(){
        
@@ -356,8 +557,46 @@ Object get_msg_data()
              while(true){
             msg_for_receive = first_one.receive();
             if (msg_for_receive.checkmessage_null()==0){
-            first_one.add_rec_msg_to_buffer(msg_for_receive);
-            msg_for_receive.disp_msg();
+            
+           
+          
+          
+          String msg_action_type;
+         String msg_kind1 = msg_for_receive.get_msg_kind();
+         if(first_one.ir_present()==1)
+     msg_action_type = first_one.get_ir_action(msg_kind1);
+    else
+     msg_action_type = first_one.get_kr_action(msg_kind1);
+     System.out.println("The action to take for this " +msg_kind1 +" is " + msg_action_type);
+     
+     
+    if(msg_action_type.equals("delay"))
+    {
+        System.out.println("delaying");
+         msg_for_receive.disp_msg();
+    
+    }
+     else if(msg_action_type.equals("duplicate")){
+        System.out.println("duplicating");
+         msg_for_receive.disp_msg();
+   first_one.add_rec_msg_to_buffer(msg_for_receive);
+   first_one.add_rec_msg_to_buffer(msg_for_receive);
+    }
+    else if(msg_action_type.equals("drop")){
+         msg_for_receive.disp_msg();
+        System.out.println("dropping");
+    }
+    else
+    {
+        System.out.println("defaulting");
+         msg_for_receive.disp_msg();
+       first_one.add_rec_msg_to_buffer(msg_for_receive);
+    }
+     
+ 
+    
+    
+          
             }
              }
     }
@@ -373,14 +612,12 @@ Object get_msg_data()
                 Receive_thread rth = new Receive_thread();
                 Thread a = new Thread(sth);
                 Thread b = new Thread(rth);
-                b.start();
-                //a.start();
+              b.start();
+               // a.start();
                 while(true){
-                
-                	//a.sleep(10);
-                	//b.sleep(10);
-                
-                
+               //a.sleep(10);
+              // b.sleep(1);
+                                
                 }
                 
               //  String fileName = "lab0.config";
