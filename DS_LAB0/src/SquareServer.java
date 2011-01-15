@@ -1,6 +1,4 @@
-                                                      
-                                                                     
-                                             
+          
     import java.net.*;
     import java.io.*;
     import java.util.Properties;
@@ -13,20 +11,35 @@
     private  ArrayList<Message> send_messages;
     private String[] all_names = new String[10];
     private String[] all_ports = new String[10];
+    private String[] msg_kind = {"kind1","kind2","kind3","kind4","kind5","kind6"};
+    private String[] msg_id = {"msgid1","msgid2","msgid3","msgid4","msgid5","msgid6"};
+    private Object[] msg_data = {12,34,56,78,89,90};
     private int num_hosts;
+    
+    public int num_of_send_buffers()
+    {
+    	return send_messages.size();
+    }
+    
     public void add_rec_msg_to_buffer(Message msg)
     {
-        
         rec_messages.add(msg);
-        msg.disp_msg();
+        //msg.disp_msg();
     }
     public void add_send_msg_to_buffer(Message msg)
     {
         
         send_messages.add(msg);
-        msg.disp_msg();
+        //msg.disp_msg();
     }
-    
+    public Message retrieve_msg_frm_send_buf()
+    {
+        Message msg = new Message();
+       // msg = send_messages.get(0);
+        msg = send_messages.remove(0);
+        //msg.disp_msg();
+        return msg;    
+    }
     public MessagePasser(String configuration_filename, String local_name){
     
     try{
@@ -71,13 +84,13 @@
              
                 all_names[count]= loc_name;
                 count++;
-              System.out.println("local name is "+loc_name);
+           //   System.out.println("local name is "+loc_name);
              
              // System.out.println(key + ":" + prop.get(key));
              local_ip = val;
                all_names[count]= local_ip;
                count++;
-             System.out.println("ip for the local name is "+ local_ip);
+          //   System.out.println("ip for the local name is "+ local_ip);
              
               
        }
@@ -90,11 +103,11 @@
                 all_names[count_port]= local_port;
                 count_port++;
              // System.out.println("got a ip at location" + loc);
-             System.out.println("local port is "+local_port);
+         //    System.out.println("local port is "+local_port);
               local_port = val;
               all_ports[count_port]= local_port;
                count_port++;
-              System.out.println("port for the local name is "+ local_port);
+        //      System.out.println("port for the local name is "+ local_port);
                 }
       
       
@@ -111,9 +124,9 @@
       if(b_is==true) {
               loc = 5;
                 is_action_id = key.substring(5,6);
-              System.out.println("is action id is "+ is_action_id);
+          //    System.out.println("is action id is "+ is_action_id);
               is_action = val;
-              System.out.println("is action "+ is_action);
+           //   System.out.println("is action "+ is_action);
       }
       
       
@@ -121,18 +134,18 @@
       if(b_ir==true) {
               loc = 5;
                 ir_action_id = key.substring(5,6);
-              System.out.println("ir action is is "+ ir_action_id);
+           //   System.out.println("ir action is is "+ ir_action_id);
               ir_action = val;
-              System.out.println("ir action "+ ir_action);
+          //    System.out.println("ir action "+ ir_action);
       }
       
        b_ks = key.startsWith("ks.kind");
       if(b_ks==true) {
               loc = 5;
                 ks_action_id = key.substring(7,8);
-              System.out.println("ks  kind is "+ ks_action_id);
+             // System.out.println("ks  kind is "+ ks_action_id);
               ks_action = val;
-              System.out.println("ks kind "+ ks_action);
+            //  System.out.println("ks kind "+ ks_action);
       }
       
       
@@ -140,9 +153,9 @@
       if(b_kr==true) {
               loc = 5;
                 kr_action_id = key.substring(7,8);
-              System.out.println("kr  kind is "+ kr_action_id);
+          //    System.out.println("kr  kind is "+ kr_action_id);
               kr_action = val;
-              System.out.println("kr kind "+ kr_action);
+          //    System.out.println("kr kind "+ kr_action);
       }
       
       
@@ -152,8 +165,15 @@
      System.out.println("Number of ips "+ count);
     System.out.println("Number of ports "+ count_port);
     for(int j=0;j<count-1;j=j+2){
-        System.out.println("Ip & port for "+ all_names[j]+" is "+ "" +all_names[j+1] + "  "+all_ports[j+1]);
+       // System.out.println("Ip & port for "+ all_names[j]+" is "+ "" +all_names[j+1] + "  "+all_ports[j+1]);
+    } // here the total file has been parsed
+    // need to create messages & add to send buffer now
+    for(int j=0;j<num_hosts;j=j+1){
+        Message msg_for_buf = new Message(all_names[j*2],msg_kind[j],msg_id[j],msg_data[j]);
+        this.add_send_msg_to_buffer(msg_for_buf);
+      //  msg_for_buf.disp_msg();
     }
+    
     }// try
     
             catch (Exception e) {
@@ -163,32 +183,32 @@
             }
 }
 void send(Message message){
-       // Socket s = new Socket(all_names[1],all_ports[1]);
-       try {
-       Socket s = new Socket("128.237.240.118",3715);
-        System.out.println("Inside client");
-    //    message.disp_msg();
+               // Socket s = new Socket(all_names[1],all_ports[1]);
+               try {
+               Socket s = new Socket("128.237.240.118",3715);
+                System.out.println("Inside client");
+            //    message.disp_msg();
 
-        DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-        DataInputStream dis = new DataInputStream(s.getInputStream());
-        
-        PrintWriter writer = new PrintWriter(s.getOutputStream(),true);
-        
-        writer.println(message.get_destname());
-        writer.println(message.get_msg_kind());
-        writer.println(message.get_msg_id());
-        writer.println(message.get_msg_data().toString());
-       
-      //  dos.writeInt(6);
+                DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+                DataInputStream dis = new DataInputStream(s.getInputStream());
+                
+                PrintWriter writer = new PrintWriter(s.getOutputStream(),true);
+                
+                writer.println(message.get_destname());
+                writer.println(message.get_msg_kind());
+                writer.println(message.get_msg_id());
+                writer.println(message.get_msg_data().toString());
+               
+              //  dos.writeInt(6);
 
-        
-        s.close();
-       }
-       catch (Exception e) {
+                
+                s.close();
+               }
+               catch (Exception e) {
 
-        System.out.println("Exception: " + e);
+                System.out.println("Exception: " + e);
 
-    }
+            }
 }
 Message receive( )  // need to make return type as Message
 {
@@ -196,36 +216,37 @@ Message receive( )  // need to make return type as Message
     
      try {
                 
-        String dest_name_msg ="";
-        String dest_msg_kind ="";
-        String dest_msg_id ="";
-        String payload = "";
-        int cnt =0;
-        ServerSocket ss = new ServerSocket(2859); 
-        System.out.println("Inside server ");
-        Socket clientSocket = ss.accept();
-        DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
-        //DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
-        BufferedReader dis = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        String result;
-        while ((result = dis.readLine()) != null){
-        if(cnt==0)
-        dest_name_msg= result;
-        else if(cnt==1)
-        dest_msg_kind= result;
-        else if(cnt==2)
-        dest_msg_id= result;
-        else
-        payload = payload + result;
-        cnt++;
-        }
-       msg_received = new Message(dest_name_msg,dest_msg_kind,dest_msg_id,payload);
-        System.out.println("Inside server result is ");
-       // dos.writeInt(result);
-        clientSocket.close();
-        ss.close();
-        
-     }
+                String dest_name_msg ="";
+                String dest_msg_kind ="";
+                String dest_msg_id ="";
+                String payload = "";
+                int cnt =0;
+                ServerSocket ss = new ServerSocket(2859); 
+                System.out.println("Inside server ");
+                Socket clientSocket = ss.accept();
+                DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
+                //DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
+                BufferedReader dis = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                String result;
+                while ((result = dis.readLine()) != null){
+                if(cnt==0)
+                dest_name_msg= result;
+                else if(cnt==1)
+                dest_msg_kind= result;
+                else if(cnt==2)
+                dest_msg_id= result;
+                else
+                payload = payload + result;
+                cnt++;
+                }
+               msg_received = new Message(dest_name_msg,dest_msg_kind,dest_msg_id,payload);
+                System.out.println("Inside server result is ");
+               // dos.writeInt(result);
+                clientSocket.close();
+                ss.close();
+                
+             
+            }
             catch (Exception e) {
 
                 System.out.println("Exception: " + e);
@@ -300,19 +321,22 @@ Object get_msg_data()
         MessagePasser first_one;
         public Send_thread()
         {
-        	String fileName = "lab0.config";
-        	first_one = new MessagePasser(fileName,"lab0");
+        String fileName = "lab0.config";
+        first_one = new MessagePasser(fileName,"lab0");
         }
-        public void run(){
+	    public void run(){
 		    Integer int_obj = new Integer(5);
 		    Object obj_for_msg = int_obj;
 		    String kind_for_msg = "kind1";
 		    String id_for_msg = "1";
 		    String name_for_msg = "alice";
-		    Message msg_for_send = new Message(name_for_msg,kind_for_msg,id_for_msg,obj_for_msg);
-		    while(true){
-		    first_one.send(msg_for_send);
-		   }
+  //  Message msg_for_send = new Message(name_for_msg,kind_for_msg,id_for_msg,obj_for_msg);
+		    Message msg_for_send = new Message();
+   
+    while(first_one.num_of_send_buffers() > 0 ){
+    	msg_for_send = first_one.retrieve_msg_frm_send_buf();
+    	first_one.send(msg_for_send);
+    }
     }
         
     }
@@ -323,7 +347,7 @@ Object get_msg_data()
         public Receive_thread()
         {
             String fileName = "lab1.config";
-        first_one = new MessagePasser(fileName,"lab0");
+            first_one = new MessagePasser(fileName,"lab0");
         }
     public void run(){
        
@@ -331,9 +355,10 @@ Object get_msg_data()
              
              while(true){
             msg_for_receive = first_one.receive();
-            if (msg_for_receive.checkmessage_null() == 0)
-            	first_one.add_rec_msg_to_buffer(msg_for_receive);
-            	//msg_for_receive.disp_msg();
+            if (msg_for_receive.checkmessage_null()==0){
+            first_one.add_rec_msg_to_buffer(msg_for_receive);
+            msg_for_receive.disp_msg();
+            }
              }
     }
         
@@ -349,11 +374,13 @@ Object get_msg_data()
                 Thread a = new Thread(sth);
                 Thread b = new Thread(rth);
                 b.start();
-                a.start();
+                //a.start();
                 while(true){
                 
-                	b.sleep(10);                
-                	a.sleep(10);
+                	//a.sleep(10);
+                	//b.sleep(10);
+                
+                
                 }
                 
               //  String fileName = "lab0.config";
